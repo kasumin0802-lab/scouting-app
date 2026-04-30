@@ -15,72 +15,34 @@
     h1 { font-size: 24px; margin-bottom: 5px; }
     p.instruction { color: #666; font-size: 14px; margin-bottom: 20px; }
     
-    /* セクションごとのデザイン */
     .section {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        background: white; border-radius: 12px; padding: 20px;
+        margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
     .section-title {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 15px;
-        text-align: left;
-        padding-left: 10px;
-        border-left: 5px solid #ccc;
+        font-size: 20px; font-weight: bold; margin-bottom: 15px;
+        text-align: left; padding-left: 10px; border-left: 5px solid #ccc;
     }
     
     .attack .section-title { border-color: #e74c3c; color: #e74c3c; }
     .defense .section-title { border-color: #3498db; color: #3498db; }
     .misc .section-title { border-color: #2ecc71; color: #2ecc71; }
 
-    /* グリッドレイアウト */
-    .grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
-        gap: 15px; 
-    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
     
-    /* 各ボタンのデザイン */
-    .box { 
-        background: #fafafa; 
-        padding: 15px 10px; 
-        border-radius: 8px; 
-        border: 1px solid #eee;
-        transition: transform 0.1s, box-shadow 0.1s;
-    }
-    .box:active { transform: scale(0.95); }
+    .box { background: #fafafa; padding: 15px 10px; border-radius: 8px; border: 1px solid #eee; }
     .box-title { font-size: 13px; font-weight: bold; margin-bottom: 8px; height: 30px; display: flex; align-items: center; justify-content: center; }
     .key-badge { font-size: 12px; font-weight: bold; background: #333; color: white; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
     
-    /* カウンターと増減ボタン */
     .counter-area { display: flex; align-items: center; justify-content: center; gap: 10px; }
     .count { font-size: 28px; font-weight: bold; width: 40px; }
-    .btn { background: #ddd; border: none; font-size: 18px; font-weight: bold; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; color: #555; transition: background 0.2s;}
+    .btn { background: #ddd; border: none; font-size: 18px; font-weight: bold; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; color: #555; }
     .btn:hover { background: #ccc; }
-    .btn:active { background: #bbb; }
 
-    /* 操作ボタンエリア */
-    .action-area {
-        margin-top: 30px;
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-    }
-
-    /* 各種ボタン */
-    .action-btn { 
-        padding: 15px 30px; font-size: 16px; cursor: pointer; 
-        border: none; border-radius: 8px; font-weight: bold;
-        transition: background-color 0.2s;
-    }
+    .action-area { margin-top: 30px; display: flex; justify-content: center; gap: 20px; }
+    .action-btn { padding: 15px 30px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; }
     .reset-btn { background-color: #95a5a6; color: white; }
-    .reset-btn:hover { background-color: #7f8c8d; }
-    
     .export-btn { background-color: #27ae60; color: white; }
-    .export-btn:hover { background-color: #2ecc71; }
 </style>
 </head>
 <body>
@@ -91,7 +53,7 @@
     <!-- アプリ画面表示エリア -->
     <div id="app"></div>
 
-    <!-- 操作ボタンエリア -->
+    <!-- 操作ボタンエリア（ここがExcel保存ボタンです） -->
     <div class="action-area">
         <button class="action-btn export-btn" onclick="exportToCSV()">📊 データをExcel (CSV) で保存</button>
         <button class="action-btn reset-btn" onclick="resetCounts()">🗑️ 全カウント リセット</button>
@@ -99,7 +61,6 @@
 
     <script>
         const config = [
-            // 攻撃要素 (Q行)
             { key: 'q', label: 'パス', category: 'attack' },
             { key: 'w', label: 'パス成功数', category: 'attack' },
             { key: 'e', label: 'ドリブル', category: 'attack' },
@@ -110,8 +71,6 @@
             { key: 'i', label: 'チャンスクリエイト', category: 'attack' },
             { key: 'o', label: 'クロス数', category: 'attack' },
             { key: 'p', label: '被ボール奪取', category: 'attack' },
-
-            // 守備要素 (A行)
             { key: 'a', label: 'タックル', category: 'defense' },
             { key: 's', label: 'ボール奪取数', category: 'defense' },
             { key: 'd', label: 'インターセプト', category: 'defense' },
@@ -121,8 +80,6 @@
             { key: 'j', label: 'ファウル', category: 'defense' },
             { key: 'k', label: '被ファウル数', category: 'defense' },
             { key: 'l', label: '被突破数', category: 'defense' },
-
-            // その他要素 (Z行)
             { key: 'z', label: 'デュエル回数', category: 'misc' },
             { key: 'x', label: 'デュエル勝利数', category: 'misc' },
             { key: 'c', label: '空中戦回数', category: 'misc' },
@@ -134,7 +91,6 @@
 
         let counts = {};
 
-        // 画面の構築処理
         function buildUI() {
             const app = document.getElementById('app');
             const categories = {
@@ -145,8 +101,7 @@
 
             config.forEach(item => {
                 counts[item.key] = 0;
-                
-                const boxHtml = `
+                categories[item.category].html += `
                     <div class="box" id="box-${item.key}">
                         <div class="box-title">${item.label}</div>
                         <div class="key-badge">${item.key.toUpperCase()} キー</div>
@@ -157,7 +112,6 @@
                         </div>
                     </div>
                 `;
-                categories[item.category].html += boxHtml;
             });
 
             let finalHtml = '';
@@ -172,30 +126,21 @@
             app.innerHTML = finalHtml;
         }
 
-        // カウント更新処理
         function updateCount(key, change) {
             if (counts[key] !== undefined) {
                 counts[key] = Math.max(0, counts[key] + change);
                 document.getElementById(`count-${key}`).innerText = counts[key];
-                
-                const box = document.getElementById(`box-${key}`);
-                box.style.backgroundColor = '#e0f7fa';
-                setTimeout(() => { box.style.backgroundColor = '#fafafa'; }, 150);
             }
         }
 
-        // キーボード操作
         document.addEventListener('keydown', function(event) {
             if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
             const key = event.key.toLowerCase();
-            
             if (counts[key] !== undefined) {
-                const change = event.shiftKey ? -1 : 1;
-                updateCount(key, change);
+                updateCount(key, event.shiftKey ? -1 : 1);
             }
         });
 
-        // リセット機能
         function resetCounts() {
             if(confirm('本当にすべてのカウントを「0」にリセットしますか？')) {
                 for (let key in counts) {
@@ -205,40 +150,28 @@
             }
         }
 
-        // ====== 新追加：CSV（Excel）エクスポート機能 ======
         function exportToCSV() {
-            // CSVのヘッダー（1行目）を作成
             let csvContent = "カテゴリー,項目名,割り当てキー,回数\n";
-
-            // 設定データの順番に従って、行を追加していく
             config.forEach(item => {
                 let catName = item.category === 'attack' ? '攻撃' : (item.category === 'defense' ? '守備' : 'その他');
-                let count = counts[item.key];
-                // Excelで扱いやすいようにカンマ区切りでテキストを作る
-                csvContent += `${catName},${item.label},${item.key.toUpperCase()},${count}\n`;
+                csvContent += `${catName},${item.label},${item.key.toUpperCase()},${counts[item.key]}\n`;
             });
 
-            // 文字化け対策（BOMを付与する）
             const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
             const blob = new Blob([bom, csvContent], { type: 'text/csv' });
-
-            // ダウンロード用のリンクを一時的に作成してクリックさせる
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
-
-            // ファイル名に現在の日時をつける（例: scouting_data_20231025_1430.csv）
+            
             const now = new Date();
             const timestamp = `${now.getFullYear()}${('0'+(now.getMonth()+1)).slice(-2)}${('0'+now.getDate()).slice(-2)}_${('0'+now.getHours()).slice(-2)}${('0'+now.getMinutes()).slice(-2)}`;
             a.setAttribute('download', `scouting_data_${timestamp}.csv`);
 
-            // 自動ダウンロードを発火
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
         }
 
-        // アプリ起動時に画面を構築
         buildUI();
     </script>
 </body>
