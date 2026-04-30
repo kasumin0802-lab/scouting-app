@@ -13,7 +13,7 @@
         color: #333;
     }
     h1 { font-size: 24px; margin-bottom: 5px; }
-    p.instruction { color: #666; font-size: 14px; margin-bottom: 30px; }
+    p.instruction { color: #666; font-size: 14px; margin-bottom: 20px; }
     
     /* セクションごとのデザイン */
     .section {
@@ -32,19 +32,18 @@
         border-left: 5px solid #ccc;
     }
     
-    /* 攻撃・守備・その他でテーマカラーを変更 */
     .attack .section-title { border-color: #e74c3c; color: #e74c3c; }
     .defense .section-title { border-color: #3498db; color: #3498db; }
     .misc .section-title { border-color: #2ecc71; color: #2ecc71; }
 
-    /* グリッドレイアウト（画面幅に合わせて自動整列） */
+    /* グリッドレイアウト */
     .grid { 
         display: grid; 
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
         gap: 15px; 
     }
     
-    /* 各ボタン（ボックス）のデザイン */
+    /* 各ボタンのデザイン */
     .box { 
         background: #fafafa; 
         padding: 15px 10px; 
@@ -63,13 +62,25 @@
     .btn:hover { background: #ccc; }
     .btn:active { background: #bbb; }
 
-    /* リセットボタン */
-    .reset-btn { 
-        padding: 12px 30px; font-size: 16px; cursor: pointer; 
-        background-color: #34495e; color: white; border: none; 
-        border-radius: 8px; font-weight: bold; margin-top: 20px;
+    /* 操作ボタンエリア */
+    .action-area {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
     }
-    .reset-btn:hover { background-color: #2c3e50; }
+
+    /* 各種ボタン */
+    .action-btn { 
+        padding: 15px 30px; font-size: 16px; cursor: pointer; 
+        border: none; border-radius: 8px; font-weight: bold;
+        transition: background-color 0.2s;
+    }
+    .reset-btn { background-color: #95a5a6; color: white; }
+    .reset-btn:hover { background-color: #7f8c8d; }
+    
+    .export-btn { background-color: #27ae60; color: white; }
+    .export-btn:hover { background-color: #2ecc71; }
 </style>
 </head>
 <body>
@@ -77,13 +88,16 @@
     <h1>本格スカウティングアプリ</h1>
     <p class="instruction">【操作】キーを押すと「+1」 / <b>Shiftキー + キー</b> で「-1」（※半角英数モード）</p>
 
-    <!-- ここにJavaScriptで自動的にボックスが生成されます -->
+    <!-- アプリ画面表示エリア -->
     <div id="app"></div>
 
-    <button class="reset-btn" onclick="resetCounts()">全カウント リセット</button>
+    <!-- 操作ボタンエリア -->
+    <div class="action-area">
+        <button class="action-btn export-btn" onclick="exportToCSV()">📊 データをExcel (CSV) で保存</button>
+        <button class="action-btn reset-btn" onclick="resetCounts()">🗑️ 全カウント リセット</button>
+    </div>
 
     <script>
-        // 設定データ：追加や変更を行いたい場合は、このリストを書き換えるだけでOKです
         const config = [
             // 攻撃要素 (Q行)
             { key: 'q', label: 'パス', category: 'attack' },
@@ -118,7 +132,6 @@
             { key: 'm', label: 'ビッグチャンス失敗', category: 'misc' }
         ];
 
-        // カウント状態を保存するオブジェクト
         let counts = {};
 
         // 画面の構築処理
@@ -130,9 +143,8 @@
                 misc: { title: 'その他', class: 'misc', html: '' }
             };
 
-            // 設定データをもとにHTMLを生成
             config.forEach(item => {
-                counts[item.key] = 0; // 初期値を0に設定
+                counts[item.key] = 0;
                 
                 const boxHtml = `
                     <div class="box" id="box-${item.key}">
@@ -148,7 +160,6 @@
                 categories[item.category].html += boxHtml;
             });
 
-            // 生成したHTMLを画面に流し込む
             let finalHtml = '';
             for (let key in categories) {
                 finalHtml += `
@@ -161,29 +172,24 @@
             app.innerHTML = finalHtml;
         }
 
-        // カウントを更新する処理（キーボード・マウス共通）
+        // カウント更新処理
         function updateCount(key, change) {
             if (counts[key] !== undefined) {
-                // 現在のカウントに変化量を足す。ただし0未満にはならないように Math.max を使う
                 counts[key] = Math.max(0, counts[key] + change);
                 document.getElementById(`count-${key}`).innerText = counts[key];
                 
-                // 押したボタンが一瞬光るような視覚効果
                 const box = document.getElementById(`box-${key}`);
                 box.style.backgroundColor = '#e0f7fa';
                 setTimeout(() => { box.style.backgroundColor = '#fafafa'; }, 150);
             }
         }
 
-        // キーボード操作の受付
+        // キーボード操作
         document.addEventListener('keydown', function(event) {
-            // 入力欄などでキーボードを使っている時は反応させない
             if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
-
             const key = event.key.toLowerCase();
             
             if (counts[key] !== undefined) {
-                // Shiftキーが押されていれば -1、そうでなければ +1
                 const change = event.shiftKey ? -1 : 1;
                 updateCount(key, change);
             }
@@ -197,6 +203,39 @@
                     document.getElementById(`count-${key}`).innerText = counts[key];
                 }
             }
+        }
+
+        // ====== 新追加：CSV（Excel）エクスポート機能 ======
+        function exportToCSV() {
+            // CSVのヘッダー（1行目）を作成
+            let csvContent = "カテゴリー,項目名,割り当てキー,回数\n";
+
+            // 設定データの順番に従って、行を追加していく
+            config.forEach(item => {
+                let catName = item.category === 'attack' ? '攻撃' : (item.category === 'defense' ? '守備' : 'その他');
+                let count = counts[item.key];
+                // Excelで扱いやすいようにカンマ区切りでテキストを作る
+                csvContent += `${catName},${item.label},${item.key.toUpperCase()},${count}\n`;
+            });
+
+            // 文字化け対策（BOMを付与する）
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const blob = new Blob([bom, csvContent], { type: 'text/csv' });
+
+            // ダウンロード用のリンクを一時的に作成してクリックさせる
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+
+            // ファイル名に現在の日時をつける（例: scouting_data_20231025_1430.csv）
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}${('0'+(now.getMonth()+1)).slice(-2)}${('0'+now.getDate()).slice(-2)}_${('0'+now.getHours()).slice(-2)}${('0'+now.getMinutes()).slice(-2)}`;
+            a.setAttribute('download', `scouting_data_${timestamp}.csv`);
+
+            // 自動ダウンロードを発火
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         // アプリ起動時に画面を構築
